@@ -83,7 +83,7 @@ r2 = r2_start
 # Loop over time steps (start at 0, end at t_max, step = delta_t)
 for i in range(2):
     v1_x_new, r1_x_new, v1_y_new, r1_y_new = euler(i, v1, r1, r2)       # Body N = 1
-    v2_x_new, r2_x_new, v2_y_new, r2_y_new = euler(i, v2, r1, r2)       # Body N = 1
+    v2_x_new, r2_x_new, v2_y_new, r2_y_new = euler(i, v2, r1, r2)       # Body N = 2
 
     v1 = [v1_x_new, v1_y_new]       # New velocity vector for Body N = 1
     v2 = [v2_x_new, v2_y_new]       # New velocity vector for Body N = 2
