@@ -23,7 +23,7 @@ def rk4 (a, t_n, v_n, r_n, delta_t):
     return v_n1, r_n1
 
 def a (g, M, r1, r2):
-    """ acceleration function for two bodys"""
+    """ acceleration function """
 
     # Distance vector r with components rx, ry, rz
     rx = r2[0] - r1[0]
@@ -31,9 +31,9 @@ def a (g, M, r1, r2):
     #rz = r2[2] - r1[2]
     rz = 0
 
-    a1 = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * rx        # Body N = 1
-    a2 = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * ry        # Body N = 2
-    return a1, a2
+    ax = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * rx
+    ay = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * ry
+    return ax, ay
 
 def euler (t_n, v1, r1, r2):
     """ Euler method to solve ODEs """
