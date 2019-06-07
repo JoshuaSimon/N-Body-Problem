@@ -35,16 +35,40 @@ def a (g, M, r1, r2):
     ay = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * ry
     return ax, ay
 
-def euler (t_n, v1, r1, r2):
+def euler (delta_t, i, v_i, r, m, G):
     """ Euler method to solve ODEs """
-    
-    ax, ay = a(g, M, r1, r2)
-    v1_x_new = v1[0] + ax * delta_t
-    r1_x_new = r1[0] + v1[0] * delta_t
+    def new_r(component):
+        return r[i][component] + v_i[component] * delta_t
 
-    v1_y_new = v1[1] + ay * delta_t
-    r1_y_new = r1[1] + v1[1] * delta_t
-    return v1_x_new, r1_x_new, v1_y_new, r1_y_new
+    def new_v(component): 
+        return v_i[component] + a[component] * delta_t
+
+    a = a_nd(r, G, m)
+    v_i_new = [new_v(component) for component in range(len(v_i))]
+    r_new = [new_r(component) for component in range(len(r[0]))]
+    return v_i_new, r_new
+
+
+def vector_abs(v):
+    return sqrt(sum(x**2 for x in v))
+
+
+def a_nd(r, G, m):
+    """ Acceleration of next timestep for 1 body in a system of n bodies
+    Acceleration as x and y components
+    Params:
+        r: Vector of vector of positions of elements
+        G: Gravitational constant
+        m: Vector of masses
+    """
+    a_new = []
+    for i in range(len(r)):
+        for j in range(len(r)):
+            if i == j: continue
+            r_ij = [r_j - r_i for (r_i, r_j) in zip(*r)]
+            a_i = [G * m[j] * x_n / vector_abs(r_ij) for x_n in r_ij]
+            a_new.append(a_i)
+    return [sum(x_n) for x_n in zip(*a_new)]
 
 
 # 1 Input Data
@@ -64,38 +88,42 @@ M = sum(m, 0)
 my = m[0]*m[1] / M
 
 # Initial position r and velocity v of the two bodys 
-r1_start = [1, 0, 0]
-v1_start = [0, 0, 0]
-r2_start = [0, 0, 0]
-v2_start = [0, -1, 0] 
+r1_start = [1, 0]
+v1_start = [0, 0]
+r2_start = [0, 0]
+v2_start = [0, -1] 
+
+r_start = [r1_start, r2_start]
+v_start = [v1_start, v2_start]
 
 # Gravity
-g = 1.0
+G = 1.0
 
 
 # 2 Calculation
 # -------------
-v1 = v1_start
-v2 = v2_start
-r1 = r1_start
-r2 = r2_start
+R = r_start
+V = v_start
 
 # Loop over time steps (start at 0, end at t_max, step = delta_t)
-for i in range(0,10):
-    v1_x_new, r1_x_new, v1_y_new, r1_y_new = euler(i, v1, r1, r2)       # Body N = 1
-    v2_x_new, r2_x_new, v2_y_new, r2_y_new = euler(i, v2, r1, r2)       # Body N = 2
+for t in range(0, int(t_max//delta_t)):
+    print()
+    for i in range(n):
+        r_i_new, v_i_new = euler(delta_t, i, V[i], R, m, G)       # Body N = 1
+        
+        R[i].append(r_i_new)
+        V[i].append(v_i_new)
 
-    v1 = [v1_x_new, v1_y_new]       # New velocity vector for Body N = 1
-    v2 = [v2_x_new, v2_y_new]       # New velocity vector for Body N = 2
-    r1 = [r1_x_new, r1_y_new]       # New position vector for Body N = 1
-    r2 = [r2_x_new, r2_y_new]       # New position vector for Body N = 2
-
+    """
     print("Time = ", i)
     print("Body 1 velocity = ", v1)
     print("Body 2 velocity = ", v2)
     print("Body 1 position = ", r1)
     print("Body 2 position = ", r2)
+    """
 
+for n in range(n):
+    plt.plot(*list(zip(*R[n])), "o", label=r"$R_{}$".format(n))
 
-
-
+plt.legend()
+plt.show()
