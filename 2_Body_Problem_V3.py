@@ -8,10 +8,10 @@ import operator
 class Vector():
     """ n-dimensional Vector """
     def __init__(self, *components):
-        self._components = components
+        self._components = list(components)
 
     def __str__(self):
-        return str(self._components)
+        return f"Vector{self._components}"
 
     __repr__ = __str__
 
@@ -21,7 +21,7 @@ class Vector():
         return Vector(*[func(s, o) for (s, o) in zip(self._components, other._components)])
 
     def elementwise(self, func):
-        return Vector(*[func(x) in self._components])
+        return Vector(*[func(x) for x in self._components])
 
     def __sub__(self, other):
         return self.two_vector_elementwise(other, operator.sub)
@@ -31,7 +31,7 @@ class Vector():
 
     @property
     def norm(self):
-        sqrt(sum(x**2 for x in self._components))
+        return sqrt(sum(x**2 for x in self._components))
 
     __abs__ = norm
 
@@ -40,6 +40,11 @@ class Vector():
 
     def __setitem__(self, index, value):
         self._components[index] = value
+
+    def __len__(self):
+        return len(self._components)
+
+    dim = __len__
 
 
 
@@ -52,8 +57,8 @@ def euler (delta_t, i, v_i, R, m, G):
         return v_i[-1][component] + a[component] * delta_t
 
     a = a_nd(R, G, m)
-    v_i_new = [new_v(component) for component in range(2)]
-    r_new = [new_r(component) for component in range(2)]
+    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
+    r_new = [new_r(component) for component in range(len(R[0][0]))]
     return v_i_new, r_new
 
 
