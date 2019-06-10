@@ -2,6 +2,46 @@
 
 from math import sqrt
 import matplotlib.pyplot as plt
+import operator
+
+
+class Vector():
+    """ n-dimensional Vector """
+    def __init__(self, *components):
+        self._components = components
+
+    def __str__(self):
+        return str(self._components)
+
+    __repr__ = __str__
+
+    def two_vector_elementwise(self, other, func):
+        if len(self) != len(other):
+            raise ValueError("Dimensions of vectors are different")
+        return Vector(*[func(s, o) for (s, o) in zip(self._components, other._components)])
+
+    def elementwise(self, func):
+        return Vector(*[func(x) in self._components])
+
+    def __sub__(self, other):
+        return self.two_vector_elementwise(other, operator.sub)
+
+    def __add__(self, other):
+        return self.two_vector_elementwise(other, operator.add)
+
+    @property
+    def norm(self):
+        sqrt(sum(x**2 for x in self._components))
+
+    __abs__ = norm
+
+    def __getitem__(self, index):
+        return self._components[index]
+
+    def __setitem__(self, index, value):
+        self._components[index] = value
+
+
 
 # just a template atm and not working
 def rk4 (a, t_n, v_n, r_n, delta_t):
@@ -21,6 +61,7 @@ def rk4 (a, t_n, v_n, r_n, delta_t):
     r_n1 = r_n + 1/6 * (r1_tilde + 2*r2_tilde + 2*r3_tilde + r4_tilde)
 
     return v_n1, r_n1
+    
 
 def a (g, M, r1, r2):
     """ acceleration function """
@@ -35,17 +76,18 @@ def a (g, M, r1, r2):
     ay = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * ry
     return ax, ay
 
-def euler (delta_t, i, v_i, r, m, G):
+
+def euler (delta_t, i, v_i, R, m, G):
     """ Euler method to solve ODEs """
     def new_r(component):
-        return r[i][component] + v_i[component] * delta_t
+        return R[i][-1][component] + v_i[-1][component] * delta_t
 
     def new_v(component): 
-        return v_i[component] + a[component] * delta_t
+        return v_i[-1][component] + a[component] * delta_t
 
-    a = a_nd(r, G, m)
-    v_i_new = [new_v(component) for component in range(len(v_i))]
-    r_new = [new_r(component) for component in range(len(r[0]))]
+    a = a_nd(R, G, m)
+    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
+    r_new = [new_r(component) for component in range(len(R[0][0]))]
     return v_i_new, r_new
 
 
@@ -53,22 +95,22 @@ def vector_abs(v):
     return sqrt(sum(x**2 for x in v))
 
 
-def a_nd(r, G, m):
+def a_nd(R, G, m):
     """ Acceleration of next timestep for 1 body in a system of n bodies
     Acceleration as x and y components
     Params:
-        r: Vector of vector of positions of elements
+        R: Vector of vector of position tuples of elements
         G: Gravitational constant
         m: Vector of masses
     """
     a_new = []
-    for i in range(len(r)):
-        for j in range(len(r)):
+    for i in range(len(R)):
+        for j in range(len(R)):
             if i == j: continue
-            r_ij = [r_j - r_i for (r_i, r_j) in zip(*r)]
-            a_i = [G * m[j] * x_n / vector_abs(r_ij) for x_n in r_ij]
+            r_ij = [r_j - r_i for (r_i, r_j) in (R[i][-1], R[j][-1])]
+            a_i = r_ij.elementwise(lambda x_n: G * m[j] * x_n / r_ij.norm)
             a_new.append(a_i)
-    return [sum(x_n) for x_n in zip(*a_new)]
+    return sum(a_new)
 
 
 # 1 Input Data
@@ -88,13 +130,13 @@ M = sum(m, 0)
 my = m[0]*m[1] / M
 
 # Initial position r and velocity v of the two bodys 
-r1_start = [1, 0]
-v1_start = [0, 0]
-r2_start = [0, 0]
-v2_start = [0, -1] 
+r1_start = Vector(1, 0)
+v1_start = Vector(0, 0)
+r2_start = Vector(0, 0)
+v2_start = Vector(0, -1) 
 
-r_start = [r1_start, r2_start]
-v_start = [v1_start, v2_start]
+r_start = [[r1_start], [r2_start]]
+v_start = [[v1_start], [v2_start]]
 
 # Gravity
 G = 1.0
@@ -109,18 +151,11 @@ V = v_start
 for t in range(0, int(t_max//delta_t)):
     print()
     for i in range(n):
-        r_i_new, v_i_new = euler(delta_t, i, V[i], R, m, G)       # Body N = 1
+        r_i_new, v_i_new = euler(delta_t, i, V[i], R, m, G)
         
         R[i].append(r_i_new)
         V[i].append(v_i_new)
 
-    """
-    print("Time = ", i)
-    print("Body 1 velocity = ", v1)
-    print("Body 2 velocity = ", v2)
-    print("Body 1 position = ", r1)
-    print("Body 2 position = ", r2)
-    """
 
 for n in range(n):
     plt.plot(*list(zip(*R[n])), "o", label=r"$R_{}$".format(n))
