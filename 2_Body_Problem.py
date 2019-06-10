@@ -4,6 +4,7 @@ from math import sqrt
 import matplotlib.pyplot as plt
 import operator
 from functools import reduce
+from itertools import cycle
 
 
 class Vector():
@@ -127,7 +128,7 @@ def prod(lst):
 # 1 Input Data
 # ---------------
 # Number of bodys
-n = 3
+n = 2
 
 # Maximum integration time
 t_max = 220.0
@@ -137,8 +138,7 @@ delta_t = 0.10
 
 # Mass
 m = [
-    0.9999, 
-    0.00001, 
+    0.9999,
     0.00009]
 M = sum(m)
 # my = prod(m) / M # only for two body problem
@@ -146,13 +146,11 @@ M = sum(m)
 # Initial position r and velocity v of the two bodys 
 r1_start = Vector(0, 0)
 v1_start = Vector(1, 0)
-r2_start = Vector(-2.25, 0)
-v2_start = Vector(0, 0)
-r3_start = Vector(0, -1)
-v3_start = Vector(0, 0.666666) 
+r2_start = Vector(0, -1)
+v2_start = Vector(0, 0.666666) 
 
-r_start = [[r1_start], [r2_start], [r3_start]]
-v_start = [[v1_start], [v2_start], [v3_start]]
+r_start = [[r1_start], [r2_start]]
+v_start = [[v1_start], [v2_start]]
 
 # Gravity
 G = 2.0
@@ -164,7 +162,6 @@ V = v_start
 
 # Loop over time steps (start at 0, end at t_max, step = delta_t)
 for t in range(0, int(t_max//delta_t)):
-    print()
     for i in range(n):
         # v_i_new_e, r_i_new_e = euler(delta_t, i, V[i], R, m, G)
         # v_i_new_ec, r_i_new_ec = euler_cormer(delta_t, i, V[i], R, m, G)
@@ -182,12 +179,18 @@ for t in range(0, int(t_max//delta_t)):
 
 plt.axis([-20, 20, -20, 20])
 
-for rs in zip(R[0], R[2]):
-    for coords in rs:
-        plt.scatter(*coords)
+colors = ["blue", "green"]
+
+# adds the related color to each coordinate pair
+a = (((coords, color) for (coords, color) in zip(body, cycle([color]))) for (body, color) in zip(R, cycle(colors)))
+# zip coordinate pairs for each timestep together
+b = iter(zip(*a))
+previous_timestep = next(b)
+for timestep in b:
+    for body in zip(previous_timestep, timestep):
+        (old_coords, _), (coords, body_color) = body
+        plt.plot(*zip(old_coords, coords), color=body_color)
     plt.pause(0.0001)
-"""
-for n in range(n):
-    plt.plot(*list(zip(*R[n])), "o", label=r"$R_{}$".format(n))
-"""
+    previous_timestep = timestep
+
 plt.show()
