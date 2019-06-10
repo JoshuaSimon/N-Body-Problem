@@ -31,6 +31,12 @@ class Vector():
     def __add__(self, other):
         return self.two_vector_elementwise(other, operator.add)
 
+    def __mul__(self, other):
+        if type(other) is self.__class__:
+            raise NotImplementedError("Vector multiplication isn't implemented")
+        else:
+            return self.elementwise(lambda x: x * other)
+
     @property
     def norm(self):
         return sqrt(sum(x**2 for x in self._components))
