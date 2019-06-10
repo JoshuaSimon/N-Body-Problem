@@ -63,8 +63,18 @@ def euler (delta_t, i, v_i, R, m, G):
     return v_i_new, r_new
 
 
-def vector_abs(v):
-    return sqrt(sum(x**2 for x in v))
+def euler_cormer (delta_t, i, v_i, R, m, G):
+    """ Euler-Cormer method to solve ODEs """
+    def new_r(component):
+        return R[i][-1][component] + 0.5 *  (v_i[-1][component] + v_i_new[component])* delta_t
+
+    def new_v(component): 
+        return v_i[-1][component] + a[component] * delta_t
+
+    a = a_nd(R, G, m)
+    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
+    r_new = [new_r(component) for component in range(len(R[0][0]))]
+    return v_i_new, r_new
 
 
 def a_nd(R, G, m):
@@ -125,7 +135,7 @@ V = v_start
 for t in range(0, int(t_max//delta_t)):
     print()
     for i in range(n):
-        v_i_new, r_i_new = euler(delta_t, i, V[i], R, m, G)
+        v_i_new, r_i_new = euler_cormer(delta_t, i, V[i], R, m, G)
         
         R[i].append(r_i_new)
         V[i].append(v_i_new)
