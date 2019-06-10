@@ -131,10 +131,10 @@ def prod(lst):
 n = 2
 
 # Maximum integration time
-t_max = 220.0
+t_max = 100.0
 
 # Time step length
-delta_t = 0.10
+delta_t = 0.100
 
 # Mass
 m = [
@@ -145,9 +145,9 @@ M = sum(m)
 
 # Initial position r and velocity v of the two bodys 
 r1_start = Vector(0, 0)
-v1_start = Vector(1, 0)
-r2_start = Vector(0, -1)
-v2_start = Vector(0, 0.666666) 
+v1_start = Vector(0, 0)
+r2_start = Vector(1, 0)
+v2_start = Vector(0, 1.4) 
 
 r_start = [[r1_start], [r2_start]]
 v_start = [[v1_start], [v2_start]]
@@ -177,7 +177,7 @@ for t in range(0, int(t_max//delta_t)):
         V[i].append(v_i_new)
 
 
-plt.axis([-20, 20, -20, 20])
+plt.axis([-1.5, 1.5, -1.5, 1.5])
 
 colors = ["blue", "green"]
 
