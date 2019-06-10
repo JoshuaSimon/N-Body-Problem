@@ -3,6 +3,7 @@
 from math import sqrt
 import matplotlib.pyplot as plt
 import operator
+from functools import reduce
 
 
 class Vector():
@@ -45,38 +46,7 @@ class Vector():
         return len(self._components)
 
     dim = __len__
-# just a template atm and not working
-def rk4 (a, t_n, v_n, r_n, delta_t):
-    """ Fourth-order Runge-Kutta method (RK4) """
 
-    a_n = a(t_n)
-    v1_tilde = a_n * delta_t                # a_n = a(t_n) = acceleration at the moment 
-    r1_tilde = v_n * delta_t
-    v2_tilde = a(t_n + 1/2 * delta_t, r_n + 1/2 * r1_tilde) * delta_t
-    r2_tilde = (v_n + 1/2 * v1_tilde) * delta_t
-    v3_tilde = a(t_n + 1/2 * delta_t, r_n + 1/2 * r2_tilde) * delta_t
-    r3_tilde = (v_n + 1/2 * v2_tilde) * delta_t
-    v4_tilde = a(t_n + delta_t, r_n + r3_tilde) * delta_t
-    r4_tilde = (v_n + 1/2 * v3_tilde) * delta_t
-
-    v_n1 = v_n + 1/6 * (v1_tilde + 2*v2_tilde + 2*v3_tilde + v4_tilde)
-    r_n1 = r_n + 1/6 * (r1_tilde + 2*r2_tilde + 2*r3_tilde + r4_tilde)
-
-    return v_n1, r_n1
-    
-
-def a (g, M, r1, r2):
-    """ acceleration function """
-
-    # Distance vector r with components rx, ry, rz
-    rx = r2[0] - r1[0]
-    ry = r2[1] - r1[1]
-    #rz = r2[2] - r1[2]
-    rz = 0
-
-    ax = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * rx
-    ay = -1 * g * M /sqrt(rx**2 + ry**2 + rz**2)**3 * ry
-    return ax, ay
 
 
 def euler (delta_t, i, v_i, R, m, G):
@@ -109,10 +79,12 @@ def a_nd(R, G, m):
     for i in range(len(R)):
         for j in range(len(R)):
             if i == j: continue
-            r_ij = [r_j - r_i for (r_i, r_j) in (R[i][-1], R[j][-1])]
+            r_ij = Vector(*[r_j - r_i for (r_i, r_j) in (R[i][-1], R[j][-1])])
+
             a_i = r_ij.elementwise(lambda x_n: G * m[j] * x_n / r_ij.norm)
             a_new.append(a_i)
-    return sum(a_new)
+    a = reduce(lambda v1, v2: v1 + v2, a_new)
+    return a
 
 
 # 1 Input Data
@@ -153,7 +125,7 @@ V = v_start
 for t in range(0, int(t_max//delta_t)):
     print()
     for i in range(n):
-        r_i_new, v_i_new = euler(delta_t, i, V[i], R, m, G)
+        v_i_new, r_i_new = euler(delta_t, i, V[i], R, m, G)
         
         R[i].append(r_i_new)
         V[i].append(v_i_new)
