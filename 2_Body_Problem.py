@@ -71,9 +71,9 @@ def euler_cormer (delta_t, i, v_i, R, m, G):
     def new_v(component): 
         return v_i[-1][component] + a[component] * delta_t
 
-    a = a_nd(R, G, m)
-    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
-    r_new = [new_r(component) for component in range(len(R[0][0]))]
+    a = a_nd(R, G, m, i)
+    v_i_new = Vector(*[new_v(component) for component in range(len(v_i[0]))])
+    r_new = Vector(*[new_r(component) for component in range(len(R[0][0]))])
     return v_i_new, r_new
 
 
@@ -93,9 +93,9 @@ def verlet (t, delta_t, i, v_i, R, m, G):
         else:
             return (r_new[component] - R[i][-2][component]) / (2 * delta_t)
 
-    a = a_nd(R, G, m)
-    r_new = [new_r(component) for component in range(len(R[0][0]))]
-    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
+    a = a_nd(R, G, m, i)
+    r_new = Vector(*[new_r(component) for component in range(len(R[0][0]))])
+    v_i_new = Vector(*[new_v(component) for component in range(len(v_i[0]))])
     return v_i_new, r_new
 
 
@@ -155,7 +155,7 @@ r_start = [[r1_start], [r2_start], [r3_start]]
 v_start = [[v1_start], [v2_start], [v3_start]]
 
 # Gravity
-G = 1.0
+G = 2.0
 
 # 2 Calculation
 # -------------
@@ -166,22 +166,23 @@ V = v_start
 for t in range(0, int(t_max//delta_t)):
     print()
     for i in range(n):
-        v_i_new_e, r_i_new_e = euler(delta_t, i, V[i], R, m, G)
-        v_i_new_ec, r_i_new_ec = euler_cormer(delta_t, i, V[i], R, m, G)
+        # v_i_new_e, r_i_new_e = euler(delta_t, i, V[i], R, m, G)
+        # v_i_new_ec, r_i_new_ec = euler_cormer(delta_t, i, V[i], R, m, G)
         v_i_new, r_i_new = verlet(t, delta_t, i, V[i], R, m, G)
 
+        """
         print()
         print("Time = ", t, "Body = ", i)
         print("Euler vs Euler-Cormer: ", abs(r_i_new_e[0] - r_i_new_ec[0]))
         print("Euler vs Verlet: ", abs(r_i_new_e[0] - r_i_new[0]))
-        
+        """
         R[i].append(r_i_new)
         V[i].append(v_i_new)
 
 
 plt.axis([-20, 20, -20, 20])
 
-for rs in zip(*R):
+for rs in zip(R[0], R[2]):
     for coords in rs:
         plt.scatter(*coords)
     plt.pause(0.0001)
