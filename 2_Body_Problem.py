@@ -77,6 +77,28 @@ def euler_cormer (delta_t, i, v_i, R, m, G):
     return v_i_new, r_new
 
 
+def verlet (t, delta_t, i, v_i, R, m, G):
+    """ Verlet algorithm """
+    def new_r(component):
+        if t == 0:
+            r_help = R[i][-1][component] - v_i[-1][component] * delta_t + a[component]/2 * delta_t**2
+            return 2 * R[i][-1][component] - r_help + a[component] * delta_t**2
+        else:
+            return 2 * R[i][-1][component] - R[i][-2][component] + a[component] * delta_t**2
+
+    def new_v(component):
+        if t == 0:
+            r_help = R[i][-1][component] - v_i[-1][component] * delta_t + a[component]/2 * delta_t**2
+            return (r_new[component] - r_help) / (2 * delta_t)
+        else:
+            return (r_new[component] - R[i][-2][component]) / (2 * delta_t)
+
+    a = a_nd(R, G, m)
+    r_new = [new_r(component) for component in range(len(R[0][0]))]
+    v_i_new = [new_v(component) for component in range(len(v_i[0]))]
+    return v_i_new, r_new
+
+
 def a_nd(R, G, m):
     """ Acceleration of next timestep for 1 body in a system of n bodies
     Acceleration as x and y components
@@ -91,7 +113,7 @@ def a_nd(R, G, m):
             if i == j: continue
             r_ij = Vector(*[r_j - r_i for (r_i, r_j) in (R[i][-1], R[j][-1])])
 
-            a_i = r_ij.elementwise(lambda x_n: G * m[j] * x_n / r_ij.norm)
+            a_i = r_ij.elementwise(lambda x_n: G * m[j] * x_n / (r_ij.norm)**3)
             a_new.append(a_i)
     a = reduce(lambda v1, v2: v1 + v2, a_new)
     return a
@@ -135,7 +157,14 @@ V = v_start
 for t in range(0, int(t_max//delta_t)):
     print()
     for i in range(n):
-        v_i_new, r_i_new = euler_cormer(delta_t, i, V[i], R, m, G)
+        v_i_new_e, r_i_new_e = euler(delta_t, i, V[i], R, m, G)
+        v_i_new_ec, r_i_new_ec = euler_cormer(delta_t, i, V[i], R, m, G)
+        v_i_new, r_i_new = verlet(t, delta_t, i, V[i], R, m, G)
+
+        print()
+        print("Time = ", t, "Body = ", i)
+        print("Euler vs Euler-Cormer: ", abs(r_i_new_e[0] - r_i_new_ec[0]))
+        print("Euler vs Verlet: ", abs(r_i_new_e[0] - r_i_new[0]))
         
         R[i].append(r_i_new)
         V[i].append(v_i_new)
