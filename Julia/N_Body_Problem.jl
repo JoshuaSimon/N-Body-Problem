@@ -71,7 +71,7 @@ function euler_method(delta_t, V, R, A)
 end
 
 
-
+# Loop from 1 to t 
 for time = 1:10
 
     #println(hcat(map(i -> acceleration(R, G, m, i, time), 1:n)...))
