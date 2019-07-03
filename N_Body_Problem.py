@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import operator
 from functools import reduce
 from itertools import cycle
+import random
 
 
 class Vector():
@@ -212,32 +213,36 @@ def prod(lst):
 # 1 Input Data
 # ---------------
 # Number of bodys
-n = 2
+n = 3
 
 # Maximum integration time
-t_max = 100.0
+t_max = 250.0
 
 # Time step length
 delta_t = 0.100
 
 # Mass
 m = [
-    0.9999,
-    0.00009]
+    0.999,
+    0.0005,
+    0.0005,
+    ]
 M = sum(m)
 # my = prod(m) / M # only for two body problem
 
 # Initial position r and velocity v of the two bodys 
 r1_start = Vector(0, 0)
-v1_start = Vector(0, 0)
+v1_start = Vector(0.25, 0)
 r2_start = Vector(1, 0)
-v2_start = Vector(0, 1.4) 
+v2_start = Vector(0, 1) 
+r3_start = Vector(2, 0)
+v3_start = Vector(0, 0.7)
 
-r_start = [[r1_start], [r2_start]]
-v_start = [[v1_start], [v2_start]]
+r_start = [[r1_start], [r2_start], [r3_start]]
+v_start = [[v1_start], [v2_start], [v3_start]]
 
 # Gravity
-G = 2.0
+G = 1.0
 
 # 2 Calculation
 # -------------
@@ -247,29 +252,19 @@ V = v_start
 # Loop over time steps (start at 0, end at t_max, step = delta_t)
 for t in range(0, int(t_max//delta_t)):
     for i in range(n):
-        # v_i_new_e, r_i_new_e = euler(delta_t, i, V[i], R, m, G)
-        # v_i_new_ec, r_i_new_ec = euler_cormer(delta_t, i, V[i], R, m, G)
-        v_i_new_v, r_i_new_v = verlet(t, delta_t, i, V[i], R, m, G)
-        v_i_new_rk, r_i_new_rk = rk4(delta_t, i, V[i], R, m, G)
+        # v_i_new, r_i_new = euler(delta_t, i, V[i], R, m, G)
+        # v_i_new, r_i_new = euler_cormer(delta_t, i, V[i], R, m, G)
+        v_i_new, r_i_new = verlet(t, delta_t, i, V[i], R, m, G)
+        #v_i_new, r_i_new = rk4(delta_t, i, V[i], R, m, G)
 
-        """
-        print()
-        print("Time = ", t, "Body = ", i)
-        print("Euler vs Euler-Cormer: ", abs(r_i_new_e[0] - r_i_new_ec[0]))
-        print("Euler vs Verlet: ", abs(r_i_new_e[0] - r_i_new[0]))
-        print("Verlet vs RK: ", abs(r_i_new_v[0] - r_i_new_rk[0]))
-        """
-        # Choose with of the calculated values should be plotted
-        r_i_new = r_i_new_rk
-        v_i_new = v_i_new_rk
-        
         R[i].append(r_i_new)
         V[i].append(v_i_new)
 
 
-plt.axis([-1.5, 1.5, -1.5, 1.5])
+plt.axis([-5, 50, -5, 5])
 
-colors = ["blue", "green"]
+colors = ["blue", "green", "red", "yellow", "purple", "black", "cyan"]
+random.shuffle(colors)
 
 # adds the related color to each coordinate pair
 a = (((coords, color) for (coords, color) in zip(body, cycle([color]))) for (body, color) in zip(R, cycle(colors)))
@@ -277,9 +272,11 @@ a = (((coords, color) for (coords, color) in zip(body, cycle([color]))) for (bod
 b = iter(zip(*a))
 previous_timestep = next(b)
 for timestep in b:
+    plt.cla()
+    plt.axis([-5, 20, -5, 5])
     for body in zip(previous_timestep, timestep):
         (old_coords, _), (coords, body_color) = body
-        plt.plot(*zip(old_coords, coords), color=body_color)
+        plt.plot(*zip(old_coords), "o", color=body_color)
     plt.pause(0.0001)
     previous_timestep = timestep
 
