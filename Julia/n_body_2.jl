@@ -90,14 +90,15 @@ end
         -0.25025 0.0]
 end
 
-"""Compute the new position and velocity
-for one body for the next timestep
+"""Euler-Method: Compute the new position and 
+velocity for all the bodys in the system for the
+next timestep.
 # Arguments
 - `Δt`: timestep length
 - `t`: Index of time step into `V`, `R` and `A`
 - `V`: Matrix of shape `[body, time, velocity vector]`
 - `R`: Matrix of shape `[body, time, position vector]`
-- `A`: Matrix of shape `[body, time, accleration vector]`
+- `A`: Matrix of shape `[body, time, acceleration vector]`
 # Returns
 ``v_new(t), r_new(t)`` Velocitiy and position of one body
 at the next timestep
@@ -111,17 +112,70 @@ function euler_method(Δt, t, V, R, A)
 end
 
 
-for time = 1:10
-    A[:, time, :] = hcat(map(i -> acceleration_i(R, G, m, time, i), 1:n)...)'
-    v_new, r_new = euler_method(Δt, time, V, R, A)
-    println(v_new, r_new)
-    V[:, time+1, :] = v_new
-    R[:, time+1, :] = r_new
-    println("Calc check")
-    println()
+"""Euler-Cormer- Method: Compute the new position and 
+velocity for all the bodys in the system for the
+next timestep.
+# Arguments
+- `Δt`: timestep length
+- `t`: Index of time step into `V`, `R` and `A`
+- `V`: Matrix of shape `[body, time, velocity vector]`
+- `R`: Matrix of shape `[body, time, position vector]`
+- `A`: Matrix of shape `[body, time, acceleration vector]`
+# Returns
+``v_new(t), r_new(t)`` Velocitiy and position of one body
+at the next timestep
+"""
+
+function euler_cormer(Δt, t, V, R, A)
+    v_new = V[:,t,:] + A[:,t,:] * Δt
+    r_new = R[:,t,:] + 0.5 * (V[:,t,:] + v_new) * Δt
+
+    return v_new, r_new
 end
 
-#= 
-for time = 2:10
-    A[:, t, :] = hcat(map(i -> acceleration_i(R, G, m, i, time), 1:n)...)'
-end =#
+
+"""Verlet-Algotihm: Compute the new position and 
+velocity for all the bodys in the system for the
+next timestep. Speical case for t = t_start.
+(Here t_start = 1).
+# Arguments
+- `Δt`: timestep length
+- `t`: Index of time step into `V`, `R` and `A`
+- `V`: Matrix of shape `[body, time, velocity vector]`
+- `R`: Matrix of shape `[body, time, position vector]`
+- `A`: Matrix of shape `[body, time, acceleration vector]`
+# Returns
+``v_new(t), r_new(t)`` Velocitiy and position of one body
+at the next timestep
+"""
+
+function verlet(Δt, t, V, R, A)
+
+    if t == 1
+        r_help = R[:,1,:] - V[:,1,:] * Δt + 0.5 * A[:,1,:] * Δt^2
+        r_new = 2 * R[:,t,:] - r_help + A[:,t,:] * Δt^2
+        v_new = (r_new - r_help) / (2 * Δt)
+    else
+        r_new = 2 * R[:,t,:] - R[:,t-1,:] + A[:,t,:] * Δt^2
+        v_new = (r_new - R[:,t-1,:]) / (2 * Δt)
+    end
+
+    return v_new, r_new
+end
+
+
+# Calculation loop
+for time = 1:t_max
+
+    A[:, time, :] = hcat(map(i -> acceleration_i(R, G, m, time, i), 1:n)...)'
+    v_new_e, r_new_e = euler_method(Δt, time, V, R, A)
+    v_new_ec, r_new_ec = euler_cormer(Δt, time, V, R, A)
+    v_new_v, r_new_v = verlet(Δt, t, V, R, A)
+
+    # Choose which values should be stored for later plotting
+    v_new = v_new_v
+    r_new = r_new_v
+
+    V[:, time+1, :] = v_new
+    R[:, time+1, :] = r_new
+end
