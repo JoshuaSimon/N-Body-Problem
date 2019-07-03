@@ -171,23 +171,20 @@ function verlet(Δt, t, V, R, A)
 end
 
 
-# Calculation loop
-for time = 1:t
+for time = 1:(t - 1)
+    A[:, time, :] = acceleration(R, G, m, time)
+    v_new, r_new = euler_method(Δt, time, V, R, A)
 
-    A[:, time, :] = hcat(map(i -> acceleration_i(R, G, m, time, i), 1:n)...)'
-    v_new_e, r_new_e = euler_method(Δt, time, V, R, A)
-    v_new_ec, r_new_ec = euler_cormer(Δt, time, V, R, A)
-    v_new_v, r_new_v = verlet(Δt, t, V, R, A)
-
-    # Choose which values should be stored for later plotting
-    v_new = v_new_v
-    r_new = r_new_v
-
-    V[:, time+1, :] = v_new
-    R[:, time+1, :] = r_new
-    
-    # Otherwise data wouldn't fit in the arrays
-    if time == t-1 
-        break
-    end
+    V[:, time + 1, :] = v_new
+    R[:, time + 1, :] = r_new
 end
+
+anim = @animate for t = 1:size(R, 2)
+    for i = 1:size(R, 1)
+        Rx = R[i, t, 1]
+        Ry = R[i, t, 2]
+        scatter([Rx], [Ry], xlims = (-5, 20), ylims = (-5, 5), label = "$i")
+    end
+end every 2
+
+gif(anim, "R3.gif", fps = 30)
