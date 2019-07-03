@@ -94,10 +94,10 @@ end
 for one body for the next timestep
 # Arguments
 - `Δt`: timestep length
-- `t`: Index of time step into `R`
-- `V`: Matrix of shape `[body, time, position vector]`
+- `t`: Index of time step into `V`, `R` and `A`
+- `V`: Matrix of shape `[body, time, velocity vector]`
 - `R`: Matrix of shape `[body, time, position vector]`
-- `A`: Matrix of shape `[body, time, position vector]`
+- `A`: Matrix of shape `[body, time, accleration vector]`
 # Returns
 ``v_new(t), r_new(t)`` Velocitiy and position of one body
 at the next timestep
