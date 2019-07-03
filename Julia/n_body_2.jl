@@ -165,7 +165,7 @@ end
 
 
 # Calculation loop
-for time = 1:t
+for time = 1:t-1
 
     A[:, time, :] = hcat(map(i -> acceleration_i(R, G, m, time, i), 1:n)...)'
     v_new_e, r_new_e = euler_method(Δt, time, V, R, A)
@@ -178,9 +178,4 @@ for time = 1:t
 
     V[:, time+1, :] = v_new
     R[:, time+1, :] = r_new
-    
-    # Otherwise data wouldn't fit in the arrays
-    if time == t-1 
-        break
-    end
 end
