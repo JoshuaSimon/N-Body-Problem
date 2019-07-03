@@ -1,5 +1,5 @@
 # N-Body-Problem
-Numerical simulation of the classic n-body-problem using pyhton. 
+Numerical simulation of the classic n-body-problem using python and julia. 
 
 For some background information (German only) see: 
 http://www.tat.physik.uni-tuebingen.de/~kley/lehre/cp-prakt/projekte/projekt-speith.pdf
