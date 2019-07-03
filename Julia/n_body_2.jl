@@ -90,6 +90,37 @@ end
         -0.25025 0.0]
 end
 
+"""Compute the new position and velocity
+for one body for the next timestep
+# Arguments
+- `Δt`: timestep length
+- `t`: Index of time step into `R`
+- `V`: Matrix of shape `[body, time, position vector]`
+- `R`: Matrix of shape `[body, time, position vector]`
+- `A`: Matrix of shape `[body, time, position vector]`
+# Returns
+``v_new(t), r_new(t)`` Velocitiy and position of one body
+at the next timestep
+"""
+
+function euler_method(Δt, t, V, R, A)
+    v_new = V[:,t,:] + A[:,t,:] * Δt
+    r_new = R[:,t,:] + V[:,t,:] * Δt
+
+    return v_new, r_new
+end
+
+
+for time = 1:10
+    A[:, time, :] = hcat(map(i -> acceleration_i(R, G, m, time, i), 1:n)...)'
+    v_new, r_new = euler_method(Δt, time, V, R, A)
+    println(v_new, r_new)
+    V[:, time+1, :] = v_new
+    R[:, time+1, :] = r_new
+    println("Calc check")
+    println()
+end
+
 #= 
 for time = 2:10
     A[:, t, :] = hcat(map(i -> acceleration_i(R, G, m, i, time), 1:n)...)'
