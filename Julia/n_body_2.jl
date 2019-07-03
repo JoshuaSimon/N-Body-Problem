@@ -18,7 +18,7 @@ n = length(m)
 G = 1.0
 
 # Matrices of shape [body, time, value]
-R = zeros(n, t, 2) # Array{Float64}(undef, 
+R = zeros(n, t, 2)
 V = zeros(n, t, 2)
 A = zeros(n, t, 2)
 
@@ -90,6 +90,7 @@ end
         -0.9985 0.0;
         -0.25025 0.0]
 end
+
 
 """
 Euler-Method: Compute the new position and 
@@ -170,21 +171,27 @@ function verlet(Δt, t, V, R, A)
     return v_new, r_new
 end
 
-
-for time = 1:(t - 1)
-    A[:, time, :] = acceleration(R, G, m, time)
-    v_new, r_new = euler_method(Δt, time, V, R, A)
-
-    V[:, time + 1, :] = v_new
-    R[:, time + 1, :] = r_new
+#= 
+iterate over solvers; solve our example problem with each one
+and animate each solution
+=#
+ for solver in [euler_method, verlet, euler_cormer]
+    for time = 1:(t - 1)
+        A[:, time, :] = acceleration(R, G, m, time)
+        v_new, r_new = solver(Δt, time, V, R, A)
+    
+        V[:, time + 1, :] = v_new
+        R[:, time + 1, :] = r_new
+    end
+    
+    anim = @animate for t = 1:size(R, 2)
+        Rx = [R[i, t, 1] for i in 1:size(R, 1)]
+        Ry = [R[i, t, 2] for i in 1:size(R, 1)]
+        scatter([Rx], [Ry], xlims = (-5, 20), ylims = (-5, 5), label = ["Body $i" for i in 1:size(R, 1)])
+    end every 2
+    
+    name = string(solver)
+    gif(anim, "R_$name.gif", fps = 30)
 end
 
-anim = @animate for t = 1:size(R, 2)
-    for i = 1:size(R, 1)
-        Rx = R[i, t, 1]
-        Ry = R[i, t, 2]
-        scatter([Rx], [Ry], xlims = (-5, 20), ylims = (-5, 5), label = "$i")
-    end
-end every 2
 
-gif(anim, "R3.gif", fps = 30)
