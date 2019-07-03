@@ -1,11 +1,12 @@
 using LinearAlgebra
 using Test
+using Plots
 
 # Initial system state
 
 # Time settings
 Δt = 0.1
-t_max = 250
+t_max = 100
 t = Int(div(t_max, Δt))
 
 # Masses of bodies
@@ -26,7 +27,8 @@ R[:, 1, :] = [0 0; 1 0; 2 0]
 V[:, 1, :] = [0.25 0; 0 1; 0 0.7]
 
 
-""" Compute acceleration vector for timestep `t` and body `i`
+"""
+ Compute acceleration vector for timestep `t` and body `i`
 
 # Arguments
 - `R`: Matrix of shape `[body, time, position vector]`
@@ -37,7 +39,6 @@ V[:, 1, :] = [0.25 0; 0 1; 0 0.7]
 
 # Returns
 ``a_i(t)`` Acceleration vector of body `i` and timestep `t`
-
 """
 function acceleration_i(R, G, m, t, i)
     a_new = []
@@ -57,16 +58,16 @@ function acceleration_i(R, G, m, t, i)
 end
 
 
-"""Compute complete acceleration matrix for timestep `t`
+"""
+Compute complete acceleration matrix for timestep `t`
 
 See `acceleration_i` for details on params
 
 # Returns
 ``A(t)`` Acceleration matrix of timestep `t`
-
 """
 function acceleration(R, G, m, t)
-    return hcat(map(i -> acceleration_i(R, G, m, t, i), 1:n)...)'
+    return hcat(map(i->acceleration_i(R, G, m, t, i), 1:n)...)'
 end
 
 @testset "acceleration" begin
@@ -90,20 +91,22 @@ end
         -0.25025 0.0]
 end
 
-"""Euler-Method: Compute the new position and 
+"""
+Euler-Method: Compute the new position and 
 velocity for all the bodys in the system for the
 next timestep.
+
 # Arguments
 - `Δt`: timestep length
 - `t`: Index of time step into `V`, `R` and `A`
 - `V`: Matrix of shape `[body, time, velocity vector]`
 - `R`: Matrix of shape `[body, time, position vector]`
 - `A`: Matrix of shape `[body, time, acceleration vector]`
+
 # Returns
 ``v_new(t), r_new(t)`` Velocitiy and position of one body
 at the next timestep
 """
-
 function euler_method(Δt, t, V, R, A)
     v_new = V[:,t,:] + A[:,t,:] * Δt
     r_new = R[:,t,:] + V[:,t,:] * Δt
@@ -112,20 +115,22 @@ function euler_method(Δt, t, V, R, A)
 end
 
 
-"""Euler-Cormer- Method: Compute the new position and 
+"""
+Euler-Cormer- Method: Compute the new position and 
 velocity for all the bodys in the system for the
 next timestep.
+
 # Arguments
 - `Δt`: timestep length
 - `t`: Index of time step into `V`, `R` and `A`
 - `V`: Matrix of shape `[body, time, velocity vector]`
 - `R`: Matrix of shape `[body, time, position vector]`
 - `A`: Matrix of shape `[body, time, acceleration vector]`
+
 # Returns
 ``v_new(t), r_new(t)`` Velocitiy and position of one body
 at the next timestep
 """
-
 function euler_cormer(Δt, t, V, R, A)
     v_new = V[:,t,:] + A[:,t,:] * Δt
     r_new = R[:,t,:] + 0.5 * (V[:,t,:] + v_new) * Δt
@@ -134,21 +139,23 @@ function euler_cormer(Δt, t, V, R, A)
 end
 
 
-"""Verlet-Algotihm: Compute the new position and 
+"""
+Verlet-Algotihm: Compute the new position and 
 velocity for all the bodys in the system for the
 next timestep. Speical case for t = t_start.
 (Here t_start = 1).
+
 # Arguments
 - `Δt`: timestep length
 - `t`: Index of time step into `V`, `R` and `A`
 - `V`: Matrix of shape `[body, time, velocity vector]`
 - `R`: Matrix of shape `[body, time, position vector]`
 - `A`: Matrix of shape `[body, time, acceleration vector]`
+
 # Returns
 ``v_new(t), r_new(t)`` Velocitiy and position of one body
 at the next timestep
 """
-
 function verlet(Δt, t, V, R, A)
 
     if t == 1
