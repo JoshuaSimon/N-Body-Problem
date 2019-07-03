@@ -188,14 +188,14 @@ function animate_solver(solver, R, G, m, t, V, Δt)
     anim = @animate for t = 1:size(R, 2)
         Rx = [R[i, t, 1] for i in 1:size(R, 1)]
         Ry = [R[i, t, 2] for i in 1:size(R, 1)]
-        scatter(Rx, Ry, xlims = (-5, 20), ylims = (-5, 5), label = ["Body $i" for i in 1:size(R, 1)])
+        scatter(Rx', Ry', xlims = (-5, 20), ylims = (-5, 5), label = ["Body $i" for i in 1:size(R, 1)])
     end every 2
     
     name = string(solver)
     gif(anim, "R_$name.gif", fps = 30)
 end
 
-for solver in [euler_cormer, euler_method, verlet]
+for solver in [verlet, euler_method, euler_cormer]
     animate_solver(solver, R, G, m, t, V, Δt)
 end
 
