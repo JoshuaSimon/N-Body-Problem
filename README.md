@@ -16,3 +16,7 @@ http://www.pit.physik.uni-tuebingen.de/~speith/Projekt1/
 ### Verlet algorithm
 
 ![Verlet algorithm gif](https://github.com/JoshuaSimon/N-Body-Problem/blob/master/Julia/R_verlet.gif)
+
+### Euler-Cormer method
+
+![Euler-Cormer method gif](https://github.com/JoshuaSimon/N-Body-Problem/blob/master/Julia/R_euler_cormer.gif)
