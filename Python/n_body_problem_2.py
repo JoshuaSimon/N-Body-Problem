@@ -48,13 +48,8 @@ def n_body_problem(t: np.array, y: np.array, gravitational_constant: float, mass
     # calculate forces on each particle
     # find matrix with all possible products between masses
     m = masses.transpose() @ masses
-    # print(f"{m=}")
-    # find all distance differences; dimension of diff1 is n × n × d
-    # print(f"{r=}")
+    # find all distance differences; dimension of diff is n × n × d
     diff = np.array([r - r[k, :] for k in range(n)])
-    # print(f"{diff=}")
-    # remove zero rows / self interactions
-    # diff = diff1[np.all(diff1 == 0, axis=2)].reshape((n, n-1, d))
     # calculate |r_i - r_j|³
     denom = np.sum(diff**2, axis=2) ** (3/2)
     # note that these are elementwise operations
@@ -65,10 +60,7 @@ def n_body_problem(t: np.array, y: np.array, gravitational_constant: float, mass
     # set the zero divisions to zero
     scalar_factor[np.isinf(scalar_factor)] = 0
     # actually calculate force vectors
-    # print(f"{scalar_factor=}")
-    # print(f"{diff[:, :, 0]=}")
     force = np.array([scalar_factor * diff[:, :, k] for k in range(d)])
-    # print(f"{force=}")
     # find total force on each particle in this step; the dimension is d × n
     cum_force = np.sum(force, axis=2)
     # the acceleration of the particle is given by a = F/m
