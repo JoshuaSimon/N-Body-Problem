@@ -20,3 +20,9 @@ http://www.pit.physik.uni-tuebingen.de/~speith/Projekt1/
 ### Euler-Cormer method
 
 ![Euler-Cormer method gif](https://github.com/JoshuaSimon/N-Body-Problem/blob/master/Julia/R_euler_cormer.gif)
+
+## Simple solar system simulation
+
+![Solar system gif](https://github.com/JoshuaSimon/N-Body-Problem/blob/master/Julia/Solar_verlet.gif)
+
+I couldn't find any data for the relative coordinates of the bodies, so I went with placing them on one axis in the distance of their radii and just shot them straight up according to v=√(GM/r).
